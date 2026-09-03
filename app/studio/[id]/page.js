@@ -24,7 +24,6 @@ export default function Desk() {
 
   useEffect(() => {
     refresh();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const line = useMemo(
@@ -91,13 +90,13 @@ export default function Desk() {
         <Link href="/studio">{project.title}</Link>
         <nav className="nav">
           <Link href={`/studio/${id}/cast`}>Cast</Link>
-          <Link href={`/studio/${id}/export">Export</Link>
+          <Link href={`/studio/${id}/export`}>Export</Link>
         </nav>
       </header>
       <div className="rail">
-        <span>Cast</span><span>→</span>
-        <span>Write</span><span>→</span>
-        <span>Take</span><span>→</span>
+        <span>Cast</span><span> → </span>
+        <span>Write</span><span> → </span>
+        <span>Take</span><span> → </span>
         <span>Export</span>
       </div>
       <aside className="side">
@@ -115,10 +114,10 @@ export default function Desk() {
       </aside>
       <section className="desk">
         <p className="hint">
-          {step === "cast" && <><b>Next:</b> cast at least one speaker.</>}
-          {step === "write" && <><b>Next:</b> add a line below, then select it.</>}
-          {step === "take" && <><b>Next:</b> Generate take on the right.</>}
-          {step === "export" && <><b>Next:</b> open Export when you have heard enough takes.</>}
+          {step === "cast" && (<><b>Next:</b> cast at least one speaker.</>)}
+          {step === "write" && (<><b>Next:</b> add a line below, then select it.</>)}
+          {step === "take" && (<><b>Next:</b> Generate take on the right.</>)}
+          {step === "export" && (<><b>Next:</b> open Export when you have heard enough takes.</>)}
         </p>
         <p className="label">2 · Scene</p>
         {!project.lines.length && <p className="tiny">Empty scene. Add the first line.</p>}
