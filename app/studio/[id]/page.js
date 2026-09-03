@@ -1,106 +1,188 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { CHARACTERS, LINES, PROJECT, TAKES } from "../../../lib/store";
+import { useParams } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { EMOTIONS } from "../../../lib/locales";
+import { getProject, patchProject, uid } from "../../../lib/local";
 
 export default function Desk() {
-  const [selected, setSelected] = useState(LINES[0].id);
-  const [takes, setTakes] = useState(TAKES);
+  const { id } = useParams();
+  const [project, setProject] = useState(null);
+  const [selected, setSelected] = useState(null);
+  const [text, setText] = useState("");
+  const [characterId, setCharacterId] = useState("");
+  const [emotion, setEmotion] = useState("calm");
   const [busy, setBusy] = useState(false);
-  const line = useMemo(
-    () => LINES.find((item) => item.id === selected) || LINES[0],
-    [selected]
-  );
-  const character = CHARACTERS.find((item) => item.id === line.characterId);
-  const lineTakes = takes.filter((t) => t.lineId === line.id || t.line_id === line.id);
 
-  async function generate() {
-    setBusy(true);
-    try {
-      const res = await fetch("/api/takes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ lineId: line.id }),
-      });
-      const data = await res.json();
-      const take = data.take || {};
-      setTakes((prev) => [
-        {
-          id: take.id || `t${Date.now()}`,
-          lineId: take.line_id || take.lineId || line.id,
-          status: take.status || "stub",
-          duration: take.duration || "00:03.0",
-          note: take.note || "stub",
-        },
-        ...prev,
-      ]);
-    } finally {
-      setBusy(false);
-    }
+  function refresh() {
+    const p = getProject(id);
+    setProject(p);
+    if (p && !selected && p.lines[0]) setSelected(p.lines[0].id);
+    if (p && !characterId && p.characters[0]) setCharacterId(p.characters[0].id);
   }
+
+  useEffect(() => {
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
+
+  const line = useMemo(
+    () => project?.lines.find((l) => l.id === selected) || project?.lines[0],
+    [project, selected]
+  );
+  const character = project?.characters.find((c) => c.id === line?.characterId);
+  const lineTakes = project?.takes.filter((t) => t.lineId === line?.id) || [];
+
+  function addLine(e) {
+    e.preventDefault();
+    if (!text.trim() || !characterId) return;
+    const newId = uid("l");
+    patchProject(id, (p) => ({
+      ...p,
+      lines: [...p.lines, { id: newId, characterId, text: text.trim(), emotion }],
+    }));
+    setText("");
+    setSelected(newId);
+    refresh();
+  }
+
+  function generate() {
+    if (!line) return;
+    setBusy(true);
+    window.setTimeout(() => {
+      patchProject(id, (p) => ({
+        ...p,
+        takes: [
+          {
+            id: uid("t"),
+            lineId: line.id,
+            status: "stub",
+            duration: "00:03.0",
+            note: "No TTS — take recorded",
+          },
+          ...p.takes,
+        ],
+      }));
+      setBusy(false);
+      refresh();
+    }, 400);
+  }
+
+  if (!project) {
+    return (
+      <main className="wrap">
+        <p>No project. <Link href="/studio/new">Create one</Link></p>
+      </main>
+    );
+  }
+
+  const step = !project.characters.length
+    ? "cast"
+    : !project.lines.length
+      ? "write"
+      : project.takes.length
+        ? "export"
+        : "take";
 
   return (
     <div className="studio">
       <header className="bar">
-        <Link href="/studio">{PROJECT.title}</Link>
-        <Link className="tiny" href={`/studio/${PROJECT.id}/export`}>Export</Link>
+        <Link href="/studio">{project.title}</Link>
+        <nav className="nav">
+          <Link href={`/studio/${id}/cast`}>Cast</Link>
+          <Link href={`/studio/${id}/export`}>Export</Link>
+        </nav>
       </header>
       <div className="rail">
-        <span>Cast</span>
+        <span className={step === "cast" ? "" : ""}><b>{step === "cast" ? "Cast" : "Cast"}</b></span>
         <span>→</span>
-        <b>Write</b>
+        <span style={{ color: step === "write" ? "var(--text)" : undefined }}>Write</span>
         <span>→</span>
-        <span>Take</span>
+        <span style={{ color: step === "take" ? "var(--text)" : undefined }}>Take</span>
         <span>→</span>
-        <span>Export</span>
+        <span style={{ color: step === "export" ? "var(--text)" : undefined }}>Export</span>
       </div>
       <aside className="side">
         <p className="label">1 · Characters</p>
-        {CHARACTERS.map((item) => (
+        {!project.characters.length && (
+          <p className="tiny">None yet. <Link href={`/studio/${id}/cast`}>Cast speakers</Link></p>
+        )}
+        {project.characters.map((item) => (
           <div className="char" key={item.id}>
             <b>{item.name}</b>
             <p className="tiny">{item.locale} · {item.voice}</p>
-            <p className="tiny">{item.locked ? "Locked — same voice every take" : "Unlocked"}</p>
+            <p className="tiny">{item.locked ? "Locked" : "Unlocked"}</p>
           </div>
         ))}
       </aside>
       <section className="desk">
         <p className="hint">
-          <b>What to do now.</b> Click Ada’s first line. Then Generate take on the right.
-          Audio files are not live yet — you are learning the desk.
+          {step === "cast" && <><b>Next:</b> cast at least one speaker.</>}
+          {step === "write" && <><b>Next:</b> add a line below, then select it.</>}
+          {step === "take" && <><b>Next:</b> Generate take on the right.</>}
+          {step === "export" && <><b>Next:</b> open Export when you have heard enough takes.</>}
         </p>
         <p className="label">2 · Scene</p>
-        {LINES.map((item) => {
-          const who = CHARACTERS.find((c) => c.id === item.characterId);
+        {!project.lines.length && <p className="tiny">Empty scene. Add the first line.</p>}
+        {project.lines.map((item) => {
+          const who = project.characters.find((c) => c.id === item.characterId);
           return (
             <article
               key={item.id}
-              className={item.id === selected ? "line on" : "line"}
+              className={item.id === (line && line.id) ? "line on" : "line"}
               onClick={() => setSelected(item.id)}
             >
-              <div className="who">{who?.name}<br />{item.emotion}</div>
+              <div className="who">{who?.name || "?"}<br />{item.emotion}</div>
               <p>{item.text}</p>
             </article>
           );
         })}
+        {project.characters.length > 0 && (
+          <form onSubmit={addLine} style={{ marginTop: 18 }}>
+            <p className="label">Add line</p>
+            <div className="field">
+              <select value={characterId} onChange={(e) => setCharacterId(e.target.value)}>
+                {project.characters.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <select value={emotion} onChange={(e) => setEmotion(e.target.value)}>
+                {EMOTIONS.map((em) => (
+                  <option key={em} value={em}>{em}</option>
+                ))}
+              </select>
+            </div>
+            <div className="field">
+              <textarea rows={3} value={text} onChange={(e) => setText(e.target.value)} placeholder="What they say" />
+            </div>
+            <button className="btn" type="submit">Add to scene</button>
+          </form>
+        )}
       </section>
       <aside className="inspector">
         <p className="label">3 · This line</p>
-        <p><b>{character?.name}</b></p>
-        <p className="tiny">{character?.locale} · {line.emotion}</p>
-        <button className="btn primary" style={{ margin: "14px 0" }} onClick={generate} disabled={busy}>
-          {busy ? "Rendering…" : "Generate take"}
-        </button>
-        <p className="tiny">Creates a take record. No TTS key = no sound file yet.</p>
-        <p className="label" style={{ marginTop: 18 }}>Takes for this line</p>
-        {lineTakes.length === 0 && <p className="tiny">None yet. Generate one.</p>}
-        {lineTakes.map((t) => (
-          <div className="take" key={t.id}>
-            <span>{t.duration} · {t.note}</span>
-            <span className={t.status === "drift" ? "bad" : "ok"}>{t.status}</span>
-          </div>
-        ))}
+        {!line && <p className="tiny">Select or add a line.</p>}
+        {line && (
+          <>
+            <p><b>{character?.name}</b></p>
+            <p className="tiny">{character?.locale} · {line.emotion}</p>
+            <button className="btn primary" style={{ margin: "14px 0" }} onClick={generate} disabled={busy}>
+              {busy ? "Rendering…" : "Generate take"}
+            </button>
+            <p className="tiny">Records a take in this browser. No sound file yet.</p>
+            <p className="label" style={{ marginTop: 18 }}>Takes</p>
+            {!lineTakes.length && <p className="tiny">None yet.</p>}
+            {lineTakes.map((t) => (
+              <div className="take" key={t.id}>
+                <span>{t.duration} · {t.note}</span>
+                <span className={t.status === "drift" ? "bad" : "ok"}>{t.status}</span>
+              </div>
+            ))}
+          </>
+        )}
       </aside>
       <footer className="transport">
         <button className="btn" type="button" disabled>Play scene</button>
