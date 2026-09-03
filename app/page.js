@@ -1,180 +1,174 @@
 import Link from "next/link";
+import SiteHeader from "./components/SiteHeader";
 
 export default function Home() {
   return (
     <main className="wrap landing">
-      <header className="top">
-        <div className="brand">Cadence<span>.</span></div>
-        <nav className="nav">
-          <a href="#how">How it works</a>
-          <a href="#pricing">Pricing</a>
-          <Link href="/login">Log in</Link>
-          <Link className="btn primary" href="/signup">Start free</Link>
-        </nav>
-      </header>
+      <SiteHeader />
 
       <section className="hero">
-        <p className="kicker">Voice director for AI video</p>
-        <h1>Cast a person from a place. Keep them there.</h1>
+        <p className="kicker">Audio for AI videos</p>
+        <h1>Make the voice sound like someone from here.</h1>
         <p className="lede">
-          Generic TTS turns a Lagos line into California by the third sentence.
-          Cadence locks language, dialect, and character so the voice in clip 12
-          is still the person you cast in clip 1. You leave with audio stems.
-          Picture stays in your editor.
+          Other apps give you one American voice and call it African.
+          In Cadence you pick Lagos English, Pidgin, Yoruba, Igbo, or Hausa.
+          That person stays the same from the first line to the last.
+          You download the sound. You edit the video somewhere else.
         </p>
         <div className="row">
           <Link className="btn primary" href="/studio/new">Start a project</Link>
-          <a className="btn" href="#how">See the flow</a>
+          <a className="btn" href="#how">See how it works</a>
         </div>
       </section>
 
       <section className="section">
-        <p className="kicker">The problem</p>
-        <h2>Why most AI voices fail the video</h2>
+        <p className="kicker">What goes wrong today</p>
+        <h2>The voice starts Nigerian and ends American.</h2>
         <div className="grid-2">
           <article className="card">
-            <h3>Place disappears</h3>
+            <h3>One fake African voice</h3>
             <p className="muted">
-              “African accent” is one slider. Lagos English, Pidgin, Yoruba, and Hausa are not the same voice.
+              Lagos is not Accra. Pidgin is not Yoruba. A slider cannot fix that.
             </p>
           </article>
           <article className="card">
-            <h3>The character drifts</h3>
+            <h3>The actor changes mid video</h3>
             <p className="muted">
-              New clip, new timbre. Episode 2 sounds like a different actor. Ads break.
+              Clip one sounds like Ada. Clip two sounds like a different woman.
             </p>
           </article>
           <article className="card">
-            <h3>Dialogue is an afterthought</h3>
+            <h3>Only one person talking</h3>
             <p className="muted">
-              Most tools generate one narrator. Video is two people in a room.
+              Most apps read the whole script as one narrator. A market scene needs two people.
             </p>
           </article>
           <article className="card">
-            <h3>Tone flips mid-line</h3>
+            <h3>The mood jumps around</h3>
             <p className="muted">
-              Free-text “be cinematic” makes the model shout, then go flat. Cadence uses a short tone list.
+              You pick calm, warm, urgent, or dry. Not a long note that confuses the voice.
             </p>
           </article>
         </div>
       </section>
 
       <section className="section" id="how">
-        <p className="kicker">How Cadence works</p>
-        <h2>Cast. Write. Take. Export.</h2>
+        <p className="kicker">How it works</p>
+        <h2>Four steps. Then you have files for your editor.</h2>
         <div className="steps four">
           <article>
-            <h3><span className="n">1</span>Cast</h3>
-            <p>Name the speaker. Pick how they speak — Lagos English, Pidgin, Yoruba, Igbo, Hausa. Lock them.</p>
+            <h3><span className="n">1</span>Pick the speaker</h3>
+            <p>Give them a name. Choose how they talk. Lock so they cannot change later.</p>
           </article>
           <article>
-            <h3><span className="n">2</span>Write</h3>
-            <p>Add turns. Each line has one person and one tone: calm, warm, urgent, or dry.</p>
+            <h3><span className="n">2</span>Write what they say</h3>
+            <p>One line at a time. Say who is talking and if they sound calm, warm, urgent, or dry.</p>
           </article>
           <article>
-            <h3><span className="n">3</span>Take</h3>
-            <p>Generate. Keep or throw away. The next line uses the same locked voice. Drift fails the take.</p>
+            <h3><span className="n">3</span>Make a take</h3>
+            <p>Press generate. Keep it or throw it away. The next line uses the same person.</p>
           </article>
           <article>
-            <h3><span className="n">4</span>Export</h3>
-            <p>A.wav, B.wav, scene.wav, scene.srt. Drop them on the timeline. Cadence does not edit the picture.</p>
+            <h3><span className="n">4</span>Download the sound</h3>
+            <p>One file per person, one file for the whole scene, plus captions. No video editor inside Cadence.</p>
           </article>
         </div>
         <div className="row">
-          <Link className="btn primary" href="/studio/new">Walk this flow now</Link>
-          <Link className="btn" href="/studio/demo">Open the sample scene</Link>
+          <Link className="btn primary" href="/studio/new">Try the four steps</Link>
+          <Link className="btn" href="/studio/demo">Hear a sample scene setup</Link>
         </div>
       </section>
 
       <section className="section">
-        <p className="kicker">Who it is for</p>
-        <h2>If the audience will hear “this person is not from here,” this is the desk.</h2>
+        <p className="kicker">Who this is for</p>
+        <h2>People who make videos for Nigerian ears.</h2>
         <div className="grid-3">
           <article className="card">
-            <h3>Local creators</h3>
-            <p className="muted">Ads, YouTube, Nollywood-style shorts, church explainers that elders will trust.</p>
+            <h3>YouTube and ads</h3>
+            <p className="muted">Shorts and ads where granny in Ikeja should not hear a US newsreader.</p>
           </article>
           <article className="card">
             <h3>Agencies</h3>
-            <p className="muted">One campaign, many markets. Pay USD to localize into Lagos or Kano — not the other way around.</p>
+            <p className="muted">One campaign that must speak Lagos, then Kano, then Pidgin. Paid in dollars.</p>
           </article>
           <article className="card">
-            <h3>Dialogue editors</h3>
-            <p className="muted">Two locked people, not one model acting a play.</p>
+            <h3>Editors</h3>
+            <p className="muted">Two voices in one scene, already split into files you can drop on a timeline.</p>
           </article>
         </div>
       </section>
 
-      <section className="section">
-        <p className="kicker">Locales at launch</p>
-        <h2>You pick a place, not a code.</h2>
+      <section className="section" id="voices">
+        <p className="kicker">Voices you can pick now</p>
+        <h2>Choose Lagos English. Not a secret label.</h2>
         <p className="muted" style={{ margin: "8px 0 16px", maxWidth: "46ch" }}>
-          Free uses this pack. Creator unlocks every locale we ship after it. Codes stay in the engine.
+          Free gets this list. Paid gets every new place we add later. The computer still uses a short code in the back. You never have to type it.
         </p>
         <div className="grid-2">
-          <article className="card"><h3>Lagos English</h3><p className="muted">City English. “Abeg, I dey come.”</p></article>
-          <article className="card"><h3>Abuja English</h3><p className="muted">Capital English — still Nigerian.</p></article>
-          <article className="card"><h3>Port Harcourt English</h3><p className="muted">South-south English.</p></article>
-          <article className="card"><h3>Nigerian Pidgin</h3><p className="muted">“How you dey?” not BBC English.</p></article>
-          <article className="card"><h3>Yoruba</h3><p className="muted">Spoken Yoruba. Tones kept.</p></article>
-          <article className="card"><h3>Igbo + Hausa</h3><p className="muted">Spoken Igbo and Hausa on the same desk.</p></article>
+          <article className="card"><h3>Lagos English</h3><p className="muted">How people talk in the city. Example: Abeg, I dey come.</p></article>
+          <article className="card"><h3>Abuja English</h3><p className="muted">Clearer Nigerian English from the capital.</p></article>
+          <article className="card"><h3>Port Harcourt English</h3><p className="muted">English from the south south.</p></article>
+          <article className="card"><h3>Nigerian Pidgin</h3><p className="muted">How you dey? Not school English.</p></article>
+          <article className="card"><h3>Yoruba</h3><p className="muted">Spoken Yoruba, with the tones.</p></article>
+          <article className="card"><h3>Igbo</h3><p className="muted">Spoken Igbo.</p></article>
+          <article className="card"><h3>Hausa</h3><p className="muted">Spoken Hausa.</p></article>
         </div>
       </section>
 
       <section className="section" id="pricing">
-        <p className="kicker">Pricing</p>
-        <h2>Global product. USD. Minutes of rendered speech.</h2>
+        <p className="kicker">Price</p>
+        <h2>Pay for minutes of finished speech.</h2>
         <div className="plans">
           <article className="card">
             <h3>Free</h3>
             <p className="price">$0</p>
-            <p className="muted">10 min / month · 2 characters · launch locales · 1 speaker · watermark</p>
+            <p className="muted">10 minutes a month. 2 people. One speaker in a scene. A small mark on the file.</p>
             <Link className="btn" href="/signup" style={{ marginTop: 14 }}>Start free</Link>
           </article>
           <article className="card featured">
             <h3>Creator monthly</h3>
             <p className="price">$19</p>
-            <p className="muted">90 min · 20 characters · scenes · 3 clones · no watermark</p>
+            <p className="muted">90 minutes. 20 people. Two speakers. 3 voice copies you own. Clean files.</p>
             <Link className="btn primary" href="/billing" style={{ marginTop: 14 }}>See Creator</Link>
           </article>
           <article className="card">
             <h3>Creator yearly</h3>
             <p className="price">$190</p>
-            <p className="muted">Same as monthly. Two months free.</p>
+            <p className="muted">Same as monthly. You pay for 10 months, get 12.</p>
             <Link className="btn" href="/billing" style={{ marginTop: 14 }}>See yearly</Link>
           </article>
         </div>
       </section>
 
       <section className="section">
-        <h2>FAQ</h2>
+        <h2>Common questions</h2>
         <article className="faq">
-          <h3>Does Cadence make the video?</h3>
-          <p className="muted">No. Audio only. Optional lip-sync is a later handoff to another tool.</p>
+          <h3>Does this make the video?</h3>
+          <p className="muted">No. Only sound. You put the sound on the video in CapCut, Premiere, or Resolve.</p>
         </article>
         <article className="faq">
-          <h3>Is this ElevenLabs with a skin?</h3>
-          <p className="muted">No. ElevenLabs can be one backend. The product is the lock, the locale, and the scene.</p>
+          <h3>Is this just ElevenLabs?</h3>
+          <p className="muted">No. That tool can be one engine we call. Cadence is the desk that keeps the person and the place steady.</p>
         </article>
         <article className="faq">
-          <h3>Can I type any accent I want?</h3>
-          <p className="muted">You pick from shipped locales. Free is the launch pack. Creator gets every live pack, not every language on Earth.</p>
+          <h3>Can I invent any accent?</h3>
+          <p className="muted">No. You pick from the list we have tested. Free is the list above. Paid gets new places when we add them.</p>
         </article>
         <article className="faq">
-          <h3>Why is there no sound yet?</h3>
-          <p className="muted">The desk is live so you can learn the flow. Real takes need a TTS vendor key.</p>
+          <h3>Why is there no sound when I press generate?</h3>
+          <p className="muted">The buttons work so you can learn the desk. Real sound needs a voice company key. That comes next.</p>
         </article>
       </section>
 
       <section className="final-cta">
-        <h2>Cast the first speaker in two minutes.</h2>
-        <p className="muted">Guest mode. This browser. No card.</p>
+        <h2>Make the first speaker in two minutes.</h2>
+        <p className="muted">Saved on this phone. No card.</p>
         <div className="row">
           <Link className="btn primary" href="/studio/new">Start a project</Link>
-          <Link className="btn" href="/studio/demo">Sample scene</Link>
+          <Link className="btn" href="/studio/demo">Open the sample</Link>
         </div>
       </section>
-      <footer className="foot">© 2026 Cadence. Voice director. Not a video editor.</footer>
+      <footer className="foot">2026 Cadence. Sound for video. Not a video app.</footer>
     </main>
   );
 }
