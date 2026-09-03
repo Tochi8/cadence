@@ -14,21 +14,29 @@ export default function Desk() {
   );
   const character = CHARACTERS.find((item) => item.id === line.characterId);
 
-  function generate() {
+  async function generate() {
     setBusy(true);
-    window.setTimeout(() => {
+    try {
+      const res = await fetch("/api/takes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ lineId: line.id }),
+      });
+      const data = await res.json();
+      const take = data.take || {};
       setTakes((prev) => [
         {
-          id: `t${prev.length + 1}`,
-          lineId: line.id,
-          status: "stub",
-          duration: "00:03.0",
-          note: "No vendor key — UX only",
+          id: take.id || `t${Date.now()}`,
+          lineId: take.line_id || take.lineId || line.id,
+          status: take.status || "stub",
+          duration: take.duration || "00:03.0",
+          note: take.note || "stub",
         },
         ...prev,
       ]);
+    } finally {
       setBusy(false);
-    }, 600);
+    }
   }
 
   return (
@@ -65,12 +73,13 @@ export default function Desk() {
       </section>
       <aside className="inspector">
         <p className="label">Line</p>
-        <p><b>{character?.name}</b></p>
+        <p><b>{character?.name}</b>
+        </p>
         <p className="tiny">{character?.locale} · {line.emotion}</p>
         <button className="btn primary" style={{ margin: "14px 0" }} onClick={generate} disabled={busy}>
           {busy ? "Rendering…" : "Generate take"}
         </button>
-        <p className="tiny">Stub only. Real TTS needs a vendor key.</p>
+        <p className="tiny">API take. Audio file waits on a TTS key.</p>
         <p className="label" style={{ marginTop: 18 }}>Takes</p>
         {takes.filter((t) => t.lineId === line.id || t.status === "stub").map((t) => (
           <div className="take" key={t.id}>
