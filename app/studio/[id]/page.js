@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { EMOTIONS } from "../../../lib/locales";
+import { EMOTIONS, emotionLabel, localeName } from "../../../lib/locales";
 import { getProject, patchProject, uid } from "../../../lib/local";
 
 export default function Desk() {
@@ -91,17 +91,14 @@ export default function Desk() {
         <Link href="/studio">{project.title}</Link>
         <nav className="nav">
           <Link href={`/studio/${id}/cast`}>Cast</Link>
-          <Link href={`/studio/${id}/export`}>Export</Link>
+          <Link href={`/studio/${id}/export">Export</Link>
         </nav>
       </header>
       <div className="rail">
-        <span className={step === "cast" ? "" : ""}><b>{step === "cast" ? "Cast" : "Cast"}</b></span>
-        <span>→</span>
-        <span style={{ color: step === "write" ? "var(--text)" : undefined }}>Write</span>
-        <span>→</span>
-        <span style={{ color: step === "take" ? "var(--text)" : undefined }}>Take</span>
-        <span>→</span>
-        <span style={{ color: step === "export" ? "var(--text)" : undefined }}>Export</span>
+        <span>Cast</span><span>→</span>
+        <span>Write</span><span>→</span>
+        <span>Take</span><span>→</span>
+        <span>Export</span>
       </div>
       <aside className="side">
         <p className="label">1 · Characters</p>
@@ -111,7 +108,7 @@ export default function Desk() {
         {project.characters.map((item) => (
           <div className="char" key={item.id}>
             <b>{item.name}</b>
-            <p className="tiny">{item.locale} · {item.voice}</p>
+            <p className="tiny">{localeName(item.locale)} · {item.voice}</p>
             <p className="tiny">{item.locked ? "Locked" : "Unlocked"}</p>
           </div>
         ))}
@@ -133,7 +130,7 @@ export default function Desk() {
               className={item.id === (line && line.id) ? "line on" : "line"}
               onClick={() => setSelected(item.id)}
             >
-              <div className="who">{who?.name || "?"}<br />{item.emotion}</div>
+              <div className="who">{who?.name || "?"}<br />{emotionLabel(item.emotion)}</div>
               <p>{item.text}</p>
             </article>
           );
@@ -144,14 +141,14 @@ export default function Desk() {
             <div className="field">
               <select value={characterId} onChange={(e) => setCharacterId(e.target.value)}>
                 {project.characters.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
+                  <option key={c.id} value={c.id}>{c.name} — {localeName(c.locale)}</option>
                 ))}
               </select>
             </div>
             <div className="field">
               <select value={emotion} onChange={(e) => setEmotion(e.target.value)}>
                 {EMOTIONS.map((em) => (
-                  <option key={em} value={em}>{em}</option>
+                  <option key={em.id} value={em.id}>{em.label} — {em.hint}</option>
                 ))}
               </select>
             </div>
@@ -168,7 +165,7 @@ export default function Desk() {
         {line && (
           <>
             <p><b>{character?.name}</b></p>
-            <p className="tiny">{character?.locale} · {line.emotion}</p>
+            <p className="tiny">{character ? localeName(character.locale) : ""} · {emotionLabel(line.emotion)}</p>
             <button className="btn primary" style={{ margin: "14px 0" }} onClick={generate} disabled={busy}>
               {busy ? "Rendering…" : "Generate take"}
             </button>

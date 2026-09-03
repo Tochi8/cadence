@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { LOCALES, STOCK } from "../../../../lib/locales";
+import { LOCALES, STOCK, localeHint, localeName } from "../../../../lib/locales";
 import { getProject, patchProject, uid } from "../../../../lib/local";
 
 export default function CastPage() {
@@ -12,7 +12,7 @@ export default function CastPage() {
   const [project, setProject] = useState(null);
   const [name, setName] = useState("");
   const [locale, setLocale] = useState("en-NG-LAG");
-  const [voice, setVoice] = useState("Stock · Lagos F");
+  const [voice, setVoice] = useState("Ada — Lagos woman");
 
   useEffect(() => {
     setProject(getProject(id));
@@ -50,15 +50,15 @@ export default function CastPage() {
       </header>
       <h1 style={{ fontSize: 22, fontWeight: 560, marginBottom: 8 }}>{project.title}</h1>
       <p className="hint">
-        <b>Add at least one speaker.</b> Two is a scene. Lock is on by default so they stay the same person.
+        <b>Add at least one speaker.</b> Pick the way they speak, not a code. Two people make a scene.
       </p>
       <form onSubmit={add}>
         <div className="field">
-          <label>Name</label>
+          <label>Character name</label>
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ada" />
         </div>
         <div className="field">
-          <label>Locale</label>
+          <label>How they speak</label>
           <select
             value={locale}
             onChange={(e) => {
@@ -69,9 +69,10 @@ export default function CastPage() {
             }}
           >
             {LOCALES.map((l) => (
-              <option key={l.code} value={l.code}>{l.name} · {l.code}</option>
+              <option key={l.code} value={l.code}>{l.name}</option>
             ))}
           </select>
+          <p className="tiny">{localeHint(locale)}</p>
         </div>
         <div className="field">
           <label>Stock voice</label>
@@ -87,7 +88,7 @@ export default function CastPage() {
         {project.characters.map((c) => (
           <div className="card" key={c.id}>
             <b>{c.name}</b>
-            <p className="tiny">{c.locale} · {c.voice} · locked</p>
+            <p className="tiny">{localeName(c.locale)} · {c.voice} · locked</p>
           </div>
         ))}
       </div>
