@@ -24,12 +24,19 @@ button, input, textarea, select {
   background: transparent;
   border: 0;
 }
+input, textarea, select {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 8px 10px;
+  border-radius: 6px;
+  width: 100%;
+}
 .wrap { max-width: 880px; margin: 0 auto; padding: 28px 20px 80px; }
 .top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 48px;
+  margin-bottom: 36px;
 }
 .brand { font-weight: 650; letter-spacing: 0.02em; }
 .brand span { color: var(--accent); }
@@ -48,13 +55,14 @@ button, input, textarea, select {
   max-width: 46ch;
   line-height: 1.55;
 }
-.row { display: flex; gap: 10px; margin-top: 28px; }
+.row { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
 .btn {
   border: 1px solid var(--line);
   background: var(--surface);
   padding: 8px 14px;
   border-radius: 6px;
   cursor: pointer;
+  display: inline-block;
 }
 .btn.primary {
   background: var(--accent);
@@ -62,20 +70,22 @@ button, input, textarea, select {
   color: #16140f;
   font-weight: 600;
 }
-.facts {
+.btn:disabled { opacity: 0.5; }
+.facts, .steps {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 16px;
-  margin-top: 56px;
+  margin-top: 48px;
   padding-top: 28px;
   border-top: 1px solid var(--line);
 }
-.facts h3 { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-.facts p { color: var(--muted); line-height: 1.45; }
+.facts h3, .steps h3 { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.facts p, .steps p { color: var(--muted); line-height: 1.45; }
+.n { color: var(--accent); margin-right: 6px; }
 .studio {
   display: grid;
   grid-template-columns: 220px 1fr 260px;
-  grid-template-rows: auto 1fr 72px;
+  grid-template-rows: 48px 40px 1fr 72px;
   height: 100vh;
 }
 .bar {
@@ -88,6 +98,17 @@ button, input, textarea, select {
   background: var(--bg-2);
   height: 48px;
 }
+.rail {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+  font-size: 12px;
+  color: var(--muted);
+}
+.rail b { color: var(--text); font-weight: 600; }
 .side, .inspector {
   background: var(--bg-2);
   border-right: 1px solid var(--line);
@@ -96,6 +117,16 @@ button, input, textarea, select {
 }
 .inspector { border-right: 0; border-left: 1px solid var(--line); }
 .desk { padding: 18px 22px; overflow: auto; }
+.hint {
+  border: 1px solid var(--line);
+  background: #191a1e;
+  padding: 12px 14px;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.hint b { color: var(--text); }
 .transport {
   grid-column: 1 / -1;
   border-top: 1px solid var(--line);
@@ -159,13 +190,16 @@ button, input, textarea, select {
   padding: 16px;
   border-radius: 8px;
 }
+.field { margin-bottom: 14px; }
+.field label { display: block; margin-bottom: 6px; font-size: 13px; }
 @media (max-width: 900px) {
   .studio {
     grid-template-columns: 1fr;
-    grid-template-rows: 48px auto auto auto 72px;
+    grid-template-rows: 48px 40px auto auto auto 72px;
     height: auto;
     min-height: 100vh;
   }
   .side, .inspector { border: 0; border-bottom: 1px solid var(--line); }
-  .facts { grid-template-columns: 1fr; }
+  .facts, .steps { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 32px; }
 }

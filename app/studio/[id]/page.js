@@ -13,6 +13,7 @@ export default function Desk() {
     [selected]
   );
   const character = CHARACTERS.find((item) => item.id === line.characterId);
+  const lineTakes = takes.filter((t) => t.lineId === line.id || t.line_id === line.id);
 
   async function generate() {
     setBusy(true);
@@ -43,20 +44,33 @@ export default function Desk() {
     <div className="studio">
       <header className="bar">
         <Link href="/studio">{PROJECT.title}</Link>
-        <span className="tiny">{PROJECT.minutesUsed} / {PROJECT.minutesCap} min</span>
+        <Link className="tiny" href={`/studio/${PROJECT.id}/export`}>Export</Link>
       </header>
+      <div className="rail">
+        <span>Cast</span>
+        <span>→</span>
+        <b>Write</b>
+        <span>→</span>
+        <span>Take</span>
+        <span>→</span>
+        <span>Export</span>
+      </div>
       <aside className="side">
-        <p className="label">Characters</p>
+        <p className="label">1 · Characters</p>
         {CHARACTERS.map((item) => (
           <div className="char" key={item.id}>
             <b>{item.name}</b>
             <p className="tiny">{item.locale} · {item.voice}</p>
-            <p className="tiny">{item.locked ? "Locked" : "Unlocked"}</p>
+            <p className="tiny">{item.locked ? "Locked — same voice every take" : "Unlocked"}</p>
           </div>
         ))}
       </aside>
       <section className="desk">
-        <p className="label">Scene</p>
+        <p className="hint">
+          <b>What to do now.</b> Click Ada’s first line. Then Generate take on the right.
+          Audio files are not live yet — you are learning the desk.
+        </p>
+        <p className="label">2 · Scene</p>
         {LINES.map((item) => {
           const who = CHARACTERS.find((c) => c.id === item.characterId);
           return (
@@ -72,16 +86,16 @@ export default function Desk() {
         })}
       </section>
       <aside className="inspector">
-        <p className="label">Line</p>
-        <p><b>{character?.name}</b>
-        </p>
+        <p className="label">3 · This line</p>
+        <p><b>{character?.name}</b></p>
         <p className="tiny">{character?.locale} · {line.emotion}</p>
         <button className="btn primary" style={{ margin: "14px 0" }} onClick={generate} disabled={busy}>
           {busy ? "Rendering…" : "Generate take"}
         </button>
-        <p className="tiny">API take. Audio file waits on a TTS key.</p>
-        <p className="label" style={{ marginTop: 18 }}>Takes</p>
-        {takes.filter((t) => t.lineId === line.id || t.status === "stub").map((t) => (
+        <p className="tiny">Creates a take record. No TTS key = no sound file yet.</p>
+        <p className="label" style={{ marginTop: 18 }}>Takes for this line</p>
+        {lineTakes.length === 0 && <p className="tiny">None yet. Generate one.</p>}
+        {lineTakes.map((t) => (
           <div className="take" key={t.id}>
             <span>{t.duration} · {t.note}</span>
             <span className={t.status === "drift" ? "bad" : "ok"}>{t.status}</span>
@@ -89,9 +103,9 @@ export default function Desk() {
         ))}
       </aside>
       <footer className="transport">
-        <button className="btn">Play scene</button>
+        <button className="btn" type="button" disabled>Play scene</button>
         <div className="wave" />
-        <span className="tiny">00:00.0</span>
+        <span className="tiny">No audio file</span>
       </footer>
     </div>
   );
