@@ -1,25 +1,46 @@
+"use client";
+
 import Link from "next/link";
-import { PROJECT } from "../../lib/store";
+import { useEffect, useState } from "react";
+import { ensureDemo, loadState } from "../../lib/local";
 
 export default function Projects() {
+  const [state, setState] = useState(null);
+
+  useEffect(() => {
+    ensureDemo();
+    setState(loadState());
+  }, []);
+
+  if (!state) return <main className="wrap">Loading…</main>;
+
   return (
     <main className="wrap">
       <header className="top">
         <Link className="brand" href="/">Cadence<span>.</span></Link>
-        <span className="tiny">Guest · {PROJECT.minutesUsed} / {PROJECT.minutesCap} min</span>
+        <nav className="nav">
+          <Link href="/billing">Billing</Link>
+          <Link href="/settings">Settings</Link>
+        </nav>
       </header>
-      <div className="row" style={{ marginTop: 0, marginBottom: 20, justifyContent: "space-between" }}>
+      <div className="row" style={{ marginTop: 0, marginBottom: 16, justifyContent: "space-between" }}>
         <h1 style={{ fontSize: 22, fontWeight: 560 }}>Projects</h1>
         <Link className="btn primary" href="/studio/new">New project</Link>
       </div>
       <p className="hint">
-        <b>What this list is.</b> Each project is one video’s audio. Open the sample, or start empty and cast two speakers.
+        <b>{state.user?.email || "Guest"}</b> · {state.minutesUsed} / {state.minutesCap} min this month.
+        Work stays in this browser until Supabase is connected.
       </p>
       <div className="list">
-        <Link className="card" href="/studio/demo">
-          <b>{PROJECT.title}</b>
-          <p className="tiny">Sample · 2 speakers · 3 lines · next: generate a take</p>
-        </Link>
+        {state.projects.map((p) => (
+          <Link className="card" key={p.id} href={`/studio/${p.id}`}>
+            <b>{p.title}</b>
+            <p className="tiny">
+              {p.characters?.length || 0} characters · {p.lines?.length || 0} lines ·{" "}
+              {p.takes?.length || 0} takes
+            </p>
+          </Link>
+        ))}
       </div>
     </main>
   );
