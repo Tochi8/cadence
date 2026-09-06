@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import SamplePlayer from "../../components/SamplePlayer";
 import { EMOTIONS, emotionLabel, localeName } from "../../../lib/locales";
 import { getProject, patchProject, uid } from "../../../lib/local";
 
@@ -58,7 +59,7 @@ export default function Desk() {
             lineId: line.id,
             status: "stub",
             duration: "00:03.0",
-            note: "No TTS — take recorded",
+            note: "Mock take ready to play",
           },
           ...p.takes,
         ],
@@ -90,7 +91,7 @@ export default function Desk() {
         <Link href="/studio">{project.title}</Link>
         <nav className="nav">
           <Link href={`/studio/${id}/cast`}>Cast</Link>
-          <Link href={`/studio/${id}/export`}>Export</Link>
+          <Link href={`/studio/${id}/export">Export</Link>
         </nav>
       </header>
       <div className="rail">
@@ -116,7 +117,7 @@ export default function Desk() {
         <p className="hint">
           {step === "cast" && (<><b>Next:</b> cast at least one speaker.</>)}
           {step === "write" && (<><b>Next:</b> add a line below, then select it.</>)}
-          {step === "take" && (<><b>Next:</b> Generate take on the right.</>)}
+          {step === "take" && (<><b>Next:</b> Generate take, then play the sample.</>)}
           {step === "export" && (<><b>Next:</b> open Export when you have heard enough takes.</>)}
         </p>
         <p className="label">2 · Scene</p>
@@ -168,7 +169,7 @@ export default function Desk() {
             <button className="btn primary" style={{ margin: "14px 0" }} onClick={generate} disabled={busy}>
               {busy ? "Rendering…" : "Generate take"}
             </button>
-            <p className="tiny">Records a take in this browser. No sound file yet.</p>
+            <SamplePlayer label="Play sample" caption="Mock take. Real speech comes when a voice key is wired." />
             <p className="label" style={{ marginTop: 18 }}>Takes</p>
             {!lineTakes.length && <p className="tiny">None yet.</p>}
             {lineTakes.map((t) => (
@@ -181,9 +182,9 @@ export default function Desk() {
         )}
       </aside>
       <footer className="transport">
-        <button className="btn" type="button" disabled>Play scene</button>
+        <SamplePlayer label="Play scene sample" />
         <div className="wave" />
-        <span className="tiny">No audio file</span>
+        <span className="tiny">Mock audio</span>
       </footer>
     </div>
   );
