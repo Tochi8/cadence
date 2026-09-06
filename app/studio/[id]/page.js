@@ -91,7 +91,7 @@ export default function Desk() {
         <Link href="/studio">{project.title}</Link>
         <nav className="nav">
           <Link href={`/studio/${id}/cast`}>Cast</Link>
-          <Link href={`/studio/${id}/export">Export</Link>
+          <Link href={`/studio/${id}/export`}>Export</Link>
         </nav>
       </header>
       <div className="rail">
