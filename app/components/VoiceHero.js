@@ -1,7 +1,3 @@
-"use client";
-
-import SamplePlayer from "./SamplePlayer";
-
 export default function VoiceHero() {
   return (
     <div className="voice-hero">
@@ -17,7 +13,6 @@ export default function VoiceHero() {
           </svg>
         </span>
       </div>
-      <SamplePlayer label="Play a sample take" caption="Lagos English · mock audio · 3s" />
     </div>
   );
 }

@@ -4,11 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const ITEMS = [
-  { href: "/", label: "Home", icon: "home" },
-  { href: "/#how", label: "How", icon: "how" },
+  { href: "/studio", label: "Projects", icon: "home" },
+  { href: "/billing", label: "Plan", icon: "how" },
   { href: "/studio/new", label: "Create", icon: "plus", primary: true },
-  { href: "/#voices", label: "Voices", icon: "voice" },
-  { href: "/login", label: "Account", icon: "user" },
+  { href: "/settings", label: "Settings", icon: "voice" },
+  { href: "/", label: "Account", icon: "user" },
 ];
 
 function Icon({ name }) {
@@ -37,8 +37,8 @@ function Icon({ name }) {
   if (name === "voice") {
     return (
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.8">
-        <rect x="9" y="4" width="6" height="10" rx="3" />
-        <path d="M7 12a5 5 0 0 0 10 0M12 17v3" />
+        <circle cx="12" cy="12" r="3" />
+        <path d="M5 12h2M17 12h2M12 5v2M12 17v2" />
       </svg>
     );
   }
@@ -54,9 +54,12 @@ export default function MobileDock() {
   const pathname = usePathname();
 
   return (
-    <nav className="dock" aria-label="Mobile">
+    <nav className="dock" aria-label="App">
       {ITEMS.map((item) => {
-        const active = item.href === "/" ? pathname === "/" : pathname.startsWith(item.href);
+        const active =
+          item.href === "/studio"
+            ? pathname === "/studio" || pathname.startsWith("/studio/")
+            : pathname === item.href || pathname.startsWith(`${item.href}/`);
         return (
           <Link
             key={item.label}

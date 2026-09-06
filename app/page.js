@@ -1,7 +1,6 @@
 import Link from "next/link";
 import SiteHeader from "./components/SiteHeader";
 import VoiceHero from "./components/VoiceHero";
-import MobileDock from "./components/MobileDock";
 
 export default function Home() {
   return (
@@ -159,8 +158,8 @@ export default function Home() {
           <p className="muted">No. You pick from the list above. We only add a new place after we have tested it.</p>
         </article>
         <article className="faq">
-          <h3>Why does the sample not sound like real speech yet?</h3>
-          <p className="muted">The play button is a mock take so you can hear the flow. Real Nigerian speech needs a voice company key. That is the next build.</p>
+          <h3>Why is there no real speech when I press play in the studio?</h3>
+          <p className="muted">Play sample is a mock take so you can test the flow after you write a line. Real Nigerian speech needs a voice company key next.</p>
         </article>
       </section>
 
@@ -173,7 +172,6 @@ export default function Home() {
         </div>
       </section>
       <footer className="foot">2026 Cadence. Sound files for video. Not a video editor.</footer>
-      <MobileDock />
     </main>
   );
 }

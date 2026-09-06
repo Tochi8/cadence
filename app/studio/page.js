@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import MobileDock from "../components/MobileDock";
 import { ensureDemo, loadState } from "../../lib/local";
 
 export default function Projects() {
@@ -15,10 +16,10 @@ export default function Projects() {
   if (!state) return <main className="wrap">Loading…</main>;
 
   return (
-    <main className="wrap">
+    <main className="wrap app-wrap">
       <header className="top">
         <Link className="brand" href="/">Cadence<span>.</span></Link>
-        <nav className="nav">
+        <nav className="nav desk-nav">
           <Link href="/billing">Billing</Link>
           <Link href="/settings">Settings</Link>
         </nav>
@@ -42,6 +43,7 @@ export default function Projects() {
           </Link>
         ))}
       </div>
+      <MobileDock />
     </main>
   );
 }
