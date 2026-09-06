@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import SamplePlayer from "../../components/SamplePlayer";
 import { EMOTIONS, emotionLabel, localeName } from "../../../lib/locales";
+import { createClient, hasBrowserSupabase } from "../../../lib/supabase/client";
 import { getProject, patchProject, uid } from "../../../lib/local";
 
 export default function Desk() {
@@ -15,16 +16,63 @@ export default function Desk() {
   const [characterId, setCharacterId] = useState("");
   const [emotion, setEmotion] = useState("calm");
   const [busy, setBusy] = useState(false);
+  const [mode, setMode] = useState("local"); // local | api
+  const [sceneId, setSceneId] = useState(null);
 
-  function refresh() {
+  async function refreshLocal() {
     const p = getProject(id);
     setProject(p);
     if (p && !selected && p.lines[0]) setSelected(p.lines[0].id);
     if (p && !characterId && p.characters[0]) setCharacterId(p.characters[0].id);
   }
 
+  async function refreshApi() {
+    const res = await fetch(`/api/projects/${id}`);
+    if (!res.ok) {
+      setProject(null);
+      return;
+    }
+    const json = await res.json();
+    const scenes = json.scenes || [];
+    const firstScene = scenes[0];
+    setSceneId(firstScene?.id || null);
+    const p = {
+      id: json.project.id,
+      title: json.project.title,
+      characters: json.characters || [],
+      lines: json.lines || [],
+      takes: json.takes || [],
+      scenes,
+    };
+    setProject(p);
+    setMode("api");
+    if (!selected && p.lines[0]) setSelected(p.lines[0].id);
+    if (!characterId && p.characters[0]) setCharacterId(p.characters[0].id);
+  }
+
   useEffect(() => {
-    refresh();
+    async function boot() {
+      if (id === "demo" || !hasBrowserSupabase()) {
+        setMode("local");
+        await refreshLocal();
+        return;
+      }
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setMode("local");
+        await refreshLocal();
+        return;
+      }
+      try {
+        await refreshApi();
+      } catch {
+        setMode("local");
+        await refreshLocal();
+      }
+    }
+    boot();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   const line = useMemo(
@@ -34,9 +82,25 @@ export default function Desk() {
   const character = project?.characters.find((c) => c.id === line?.characterId);
   const lineTakes = project?.takes.filter((t) => t.lineId === line?.id) || [];
 
-  function addLine(e) {
+  async function addLine(e) {
     e.preventDefault();
     if (!text.trim() || !characterId) return;
+
+    if (mode === "api" && sceneId) {
+      const res = await fetch(`/api/scenes/${sceneId}/lines`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ characterId, text: text.trim(), emotion }),
+      });
+      const json = await res.json();
+      if (!res.ok) return;
+      setText("");
+      const newId = json.line?.id;
+      if (newId) setSelected(newId);
+      await refreshApi();
+      return;
+    }
+
     const newId = uid("l");
     patchProject(id, (p) => ({
       ...p,
@@ -44,13 +108,28 @@ export default function Desk() {
     }));
     setText("");
     setSelected(newId);
-    refresh();
+    await refreshLocal();
   }
 
-  function generate() {
+  async function generate() {
     if (!line) return;
     setBusy(true);
-    window.setTimeout(() => {
+
+    if (mode === "api") {
+      try {
+        await fetch("/api/takes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ lineId: line.id }),
+        });
+        await refreshApi();
+      } finally {
+        setBusy(false);
+      }
+      return;
+    }
+
+    window.setTimeout(async () => {
       patchProject(id, (p) => ({
         ...p,
         takes: [
@@ -65,7 +144,7 @@ export default function Desk() {
         ],
       }));
       setBusy(false);
-      refresh();
+      await refreshLocal();
     }, 400);
   }
 
@@ -119,6 +198,8 @@ export default function Desk() {
           {step === "write" && (<><b>Next:</b> add a line below, then select it.</>)}
           {step === "take" && (<><b>Next:</b> Generate take, then play the sample.</>)}
           {step === "export" && (<><b>Next:</b> open Export when you have heard enough takes.</>)}
+          {" "}
+          <span className="tiny">({mode === "api" ? "cloud" : "local"})</span>
         </p>
         <p className="label">2 · Scene</p>
         {!project.lines.length && <p className="tiny">Empty scene. Add the first line.</p>}
