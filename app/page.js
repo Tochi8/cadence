@@ -1,23 +1,28 @@
 import Link from "next/link";
 import SiteHeader from "./components/SiteHeader";
+import VoiceHero from "./components/VoiceHero";
+import MobileDock from "./components/MobileDock";
 
 export default function Home() {
   return (
     <main className="wrap landing">
       <SiteHeader />
 
-      <section className="hero">
-        <p className="kicker">Audio for AI videos</p>
-        <h1>Cadence makes spoken audio that sounds Nigerian, and stays that way.</h1>
-        <p className="lede">
-          You choose a speaker and how they talk: Lagos English, Pidgin, Yoruba, Igbo, or Hausa.
-          You write the lines. Cadence keeps that same person on every line.
-          You download the sound files and put them on your video in another app.
-        </p>
-        <div className="row">
-          <Link className="btn primary" href="/studio/new">Start a project</Link>
-          <a className="btn" href="#how">See how it works</a>
+      <section className="hero hero-split">
+        <div>
+          <p className="kicker">Audio for AI videos</p>
+          <h1>Cadence makes spoken audio that sounds Nigerian, and stays that way.</h1>
+          <p className="lede">
+            You choose a speaker and how they talk: Lagos English, Pidgin, Yoruba, Igbo, or Hausa.
+            You write the lines. Cadence keeps that same person on every line.
+            You download the sound files and put them on your video in another app.
+          </p>
+          <div className="row">
+            <Link className="btn primary" href="/studio/new">Start a project</Link>
+            <a className="btn" href="#how">See how it works</a>
+          </div>
         </div>
+        <VoiceHero />
       </section>
 
       <section className="section">
@@ -154,8 +159,8 @@ export default function Home() {
           <p className="muted">No. You pick from the list above. We only add a new place after we have tested it.</p>
         </article>
         <article className="faq">
-          <h3>Why is there no sound when I press generate?</h3>
-          <p className="muted">The desk works so you can learn the steps. Real sound needs a voice company key. That is the next build.</p>
+          <h3>Why does the sample not sound like real speech yet?</h3>
+          <p className="muted">The play button is a mock take so you can hear the flow. Real Nigerian speech needs a voice company key. That is the next build.</p>
         </article>
       </section>
 
@@ -168,6 +173,7 @@ export default function Home() {
         </div>
       </section>
       <footer className="foot">2026 Cadence. Sound files for video. Not a video editor.</footer>
+      <MobileDock />
     </main>
   );
 }
