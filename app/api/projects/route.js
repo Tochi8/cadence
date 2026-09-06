@@ -1,33 +1,50 @@
 import { PROJECT } from "../../../lib/store";
-import { hasSupabase, supabaseAdmin } from "../../../lib/supabase";
+import { getUserClient, unauthorized } from "../../../lib/supabase/api";
 
 export async function GET() {
-  if (!hasSupabase()) {
+  const { mode, supabase, user, unauthorized: noAuth } = await getUserClient();
+
+  if (mode === "memory") {
     return Response.json({ source: "memory", projects: [PROJECT] });
   }
-  const db = supabaseAdmin();
-  const { data, error } = await db
+  if (noAuth) return unauthorized();
+
+  const { data, error } = await supabase
     .from("projects")
-    .select("id, title, created_at")
+    .select("id, title, created_at, user_id")
+    .eq("user_id", user.id)
     .order("created_at", { ascending: false });
+
   if (error) return Response.json({ error: error.message }, { status: 500 });
   return Response.json({ source: "supabase", projects: data });
 }
 
 export async function POST(request) {
   const body = await request.json().catch(() => ({}));
-  const title = body.title || "Untitled project";
-  if (!hasSupabase()) {
-    return Response.json({ source: "memory", project: { id: "demo", title } });
+  const title = (body.title || "Untitled project").trim() || "Untitled project";
+  const { mode, supabase, user, unauthorized: noAuth } = await getUserClient();
+
+  if (mode === "memory") {
+    return Response.json({
+      source: "memory",
+      project: { id: `p_${Date.now()}`, title },
+    });
   }
-  const db = supabaseAdmin();
-  const { data: profile } = await db.from("profiles").select("id").limit(1).maybeSingle();
-  const { data, error } = await db
+  if (noAuth) return unauthorized();
+
+  const { data, error } = await supabase
     .from("projects")
-    .insert({ title, user_id: profile?.id || null })
+    .insert({ title, user_id: user.id })
     .select()
     .single();
+
   if (error) return Response.json({ error: error.message }, { status: 500 });
-  await db.from("scenes").insert({ project_id: data.id, title: "Scene 1" });
+
+  await supabase.from("scenes").insert({
+    project_id: data.id,
+    user_id: user.id,
+    title: "Scene 1",
+  });
+
   return Response.json({ source: "supabase", project: data });
 }

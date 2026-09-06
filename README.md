@@ -1,14 +1,6 @@
 # Cadence
+setup: see .env.example
 
-Voice director for AI video. Locale-locked characters, scenes, takes. Audio only.
-
-Repo: `Tochi8/cadence`. Do not mix with tickr or flume.
-
-```bash
-npm install
-npm run dev
-```
-
-- `/` marketing
-- `/studio` projects
-- `/studio/demo` scene desk (stub takes until vendor keys exist)
+Paste keys from Supabase Settings API. Enable Email auth.
+Middleware: auth required for studio except studio/demo.
+API uses user JWT + RLS; takes are stub only.

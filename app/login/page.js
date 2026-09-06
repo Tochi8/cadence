@@ -1,20 +1,45 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
+import { createClient, hasBrowserSupabase } from "../../lib/supabase/client";
 import { loadState, saveState } from "../../lib/local";
 
-export default function Login() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next") || "/studio";
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  function submit(e) {
+  async function submit(e) {
     e.preventDefault();
-    const state = loadState();
-    state.user = { email: email || "guest@cadence.local" };
-    saveState(state);
-    router.push("/studio");
+    setError("");
+    setBusy(true);
+
+    if (!hasBrowserSupabase()) {
+      const state = loadState();
+      state.user = { email: email || "guest@cadence.local" };
+      saveState(state);
+      router.push(next === "/studio" ? "/studio/demo" : next);
+      return;
+    }
+
+    const supabase = createClient();
+    const { error: authError } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password,
+    });
+    setBusy(false);
+    if (authError) {
+      setError(authError.message);
+      return;
+    }
+    router.push(next.startsWith("/") ? next : "/studio");
+    router.refresh();
   }
 
   return (
@@ -25,18 +50,52 @@ export default function Login() {
       </header>
       <h1 style={{ fontSize: 22, fontWeight: 560, marginBottom: 8 }}>Log in</h1>
       <p className="tiny" style={{ marginBottom: 20 }}>
-        Guest session on this device. Not a real password.
+        Email and password via Supabase Auth.
+        {!hasBrowserSupabase() && " Env missing — guest mode on this device."}
       </p>
       <form onSubmit={submit}>
         <div className="field">
           <label htmlFor="email">Email</label>
-          <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@studio.com" />
+          <input
+            id="email"
+            type="email"
+            required={hasBrowserSupabase()}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@studio.com"
+            autoComplete="email"
+          />
         </div>
+        <div className="field">
+          <label htmlFor="password">Password</label>
+          <input
+            id="password"
+            type="password"
+            required={hasBrowserSupabase()}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            autoComplete="current-password"
+          />
+        </div>
+        {error && (
+          <p className="tiny" style={{ color: "var(--bad, #c44)", marginBottom: 12 }}>{error}</p>
+        )}
         <div className="row" style={{ marginTop: 8 }}>
-          <button className="btn primary" type="submit">Continue</button>
-          <Link className="btn" href="/studio">Skip — guest</Link>
+          <button className="btn primary" type="submit" disabled={busy}>
+            {busy ? "Signing in…" : "Continue"}
+          </button>
+          <Link className="btn" href="/studio/demo">Skip — guest demo</Link>
         </div>
       </form>
     </main>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<main className="wrap">Loading…</main>}>
+      <LoginForm />
+    </Suspense>
   );
 }

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { LOCALES, STOCK, localeHint, localeName } from "../../../../lib/locales";
+import { createClient, hasBrowserSupabase } from "../../../../lib/supabase/client";
 import { getProject, patchProject, uid } from "../../../../lib/local";
 
 export default function CastPage() {
@@ -13,14 +14,59 @@ export default function CastPage() {
   const [name, setName] = useState("");
   const [locale, setLocale] = useState("en-NG-LAG");
   const [voice, setVoice] = useState("Ada — Lagos woman");
+  const [mode, setMode] = useState("local");
+
+  async function load() {
+    if (id === "demo" || !hasBrowserSupabase()) {
+      setMode("local");
+      setProject(getProject(id));
+      return;
+    }
+    const supabase = createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      setMode("local");
+      setProject(getProject(id));
+      return;
+    }
+    const res = await fetch(`/api/projects/${id}`);
+    if (!res.ok) {
+      setMode("local");
+      setProject(getProject(id));
+      return;
+    }
+    const json = await res.json();
+    setMode("api");
+    setProject({
+      id: json.project.id,
+      title: json.project.title,
+      characters: json.characters || [],
+      lines: json.lines || [],
+      takes: json.takes || [],
+    });
+  }
 
   useEffect(() => {
-    setProject(getProject(id));
+    load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  function add(e) {
+  async function add(e) {
     e.preventDefault();
     if (!name.trim()) return;
+
+    if (mode === "api") {
+      const res = await fetch(`/api/projects/${id}/characters`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: name.trim(), locale, voice, locked: true }),
+      });
+      if (!res.ok) return;
+      setName("");
+      await load();
+      return;
+    }
+
     patchProject(id, (p) => ({
       ...p,
       characters: [
@@ -46,20 +92,21 @@ export default function CastPage() {
     <main className="wrap">
       <header className="top">
         <Link className="brand" href="/">Cadence<span>.</span></Link>
-        <span className="tiny">Step 2 · Cast</span>
+        <span className="tiny desk-nav">Step 2 · Cast</span>
       </header>
       <h1 style={{ fontSize: 22, fontWeight: 560, marginBottom: 8 }}>{project.title}</h1>
-      <p className="hint">
-        <b>Add at least one speaker.</b> Pick the way they speak, not a code. Two people make a scene.
+      <p className="tiny" style={{ marginBottom: 20 }}>
+        Add at least one speaker. Pick the way they speak, not a code. Two people make a scene.
       </p>
       <form onSubmit={add}>
         <div className="field">
-          <label>Character name</label>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Ada" />
+          <label htmlFor="name">Character name</label>
+          <input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Ada" />
         </div>
         <div className="field">
-          <label>How they speak</label>
+          <label htmlFor="locale">How they speak</label>
           <select
+            id="locale"
             value={locale}
             onChange={(e) => {
               const next = e.target.value;
@@ -69,16 +116,16 @@ export default function CastPage() {
             }}
           >
             {LOCALES.map((l) => (
-              <option key={l.code} value={l.code}>{l.name}</option>
+              <option key={l.id} value={l.id}>{l.name}</option>
             ))}
           </select>
           <p className="tiny">{localeHint(locale)}</p>
         </div>
         <div className="field">
-          <label>Stock voice</label>
-          <select value={voice} onChange={(e) => setVoice(e.target.value)}>
+          <label htmlFor="voice">Stock voice</label>
+          <select id="voice" value={voice} onChange={(e) => setVoice(e.target.value)}>
             {(voices.length ? voices : STOCK).map((s) => (
-              <option key={s.id} value={s.label}>{s.label}</option>
+              <option key={s.label} value={s.label}>{s.label}</option>
             ))}
           </select>
         </div>
@@ -92,13 +139,8 @@ export default function CastPage() {
           </div>
         ))}
       </div>
-      <div className="row">
-        <button
-          className="btn primary"
-          type="button"
-          disabled={!project.characters.length}
-          onClick={() => router.push(`/studio/${id}`)}
-        >
+      <div className="row" style={{ marginTop: 20 }}>
+        <button className="btn primary" type="button" onClick={() => router.push(`/studio/${id}`)}>
           Write the scene
         </button>
       </div>

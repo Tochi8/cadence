@@ -3,17 +3,62 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import MobileDock from "../components/MobileDock";
+import { createClient, hasBrowserSupabase } from "../../lib/supabase/client";
 import { ensureDemo, loadState } from "../../lib/local";
 
 export default function Projects() {
   const [state, setState] = useState(null);
+  const [remote, setRemote] = useState(null);
+  const [email, setEmail] = useState(null);
+  const [source, setSource] = useState("local");
 
   useEffect(() => {
-    ensureDemo();
-    setState(loadState());
+    async function boot() {
+      ensureDemo();
+      const local = loadState();
+      setState(local);
+
+      if (!hasBrowserSupabase()) {
+        setEmail(local.user?.email || null);
+        setSource("local");
+        return;
+      }
+
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setEmail(local.user?.email || null);
+        setSource("local");
+        return;
+      }
+
+      setEmail(user.email);
+      try {
+        const res = await fetch("/api/projects");
+        const json = await res.json();
+        if (res.ok) {
+          setRemote(json.projects || []);
+          setSource(json.source || "supabase");
+        }
+      } catch {
+        setSource("local");
+      }
+    }
+    boot();
   }, []);
 
   if (!state) return <main className="wrap">Loading…</main>;
+
+  const projects =
+    source !== "local" && remote
+      ? remote.map((p) => ({
+          id: p.id,
+          title: p.title,
+          characters: [],
+          lines: [],
+          takes: [],
+        }))
+      : state.projects;
 
   return (
     <main className="wrap app-wrap">
@@ -29,11 +74,15 @@ export default function Projects() {
         <Link className="btn primary" href="/studio/new">New project</Link>
       </div>
       <p className="hint">
-        <b>{state.user?.email || "Guest"}</b> · {state.minutesUsed} / {state.minutesCap} min this month.
-        Work stays in this browser until Supabase is connected.
+        <b>{email || "Guest"}</b> · {state.minutesUsed} / {state.minutesCap} min this month.
+        {source === "local"
+          ? " Work stays in this browser until you sign in."
+          : ` Synced via ${source}.`}
+        {" "}
+        <Link href="/studio/demo">Open guest demo</Link>
       </p>
       <div className="list">
-        {state.projects.map((p) => (
+        {projects.map((p) => (
           <Link className="card" key={p.id} href={`/studio/${p.id}`}>
             <b>{p.title}</b>
             <p className="tiny">
@@ -42,6 +91,9 @@ export default function Projects() {
             </p>
           </Link>
         ))}
+        {!projects.length && (
+          <p className="tiny">No projects yet. Create one or open the guest demo.</p>
+        )}
       </div>
       <MobileDock />
     </main>

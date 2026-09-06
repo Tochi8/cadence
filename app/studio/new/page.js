@@ -4,24 +4,52 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import MobileDock from "../../components/MobileDock";
+import { createClient, hasBrowserSupabase } from "../../../lib/supabase/client";
 import { loadState, saveState, uid } from "../../../lib/local";
 
 export default function NewProject() {
   const router = useRouter();
   const [title, setTitle] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  function go(e) {
+  async function go(e) {
     e.preventDefault();
+    setError("");
+    setBusy(true);
+    const name = title.trim() || "Untitled project";
+
+    if (hasBrowserSupabase()) {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const res = await fetch("/api/projects", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ title: name }),
+        });
+        const json = await res.json();
+        setBusy(false);
+        if (!res.ok) {
+          setError(json.error || "Could not create project");
+          return;
+        }
+        router.push(`/studio/${json.project.id}/cast`);
+        return;
+      }
+    }
+
     const state = loadState();
     const project = {
       id: uid("p"),
-      title: title.trim() || "Untitled project",
+      title: name,
       characters: [],
       lines: [],
       takes: [],
     };
     state.projects.unshift(project);
     saveState(state);
+    setBusy(false);
     router.push(`/studio/${project.id}/cast`);
   }
 
@@ -40,8 +68,11 @@ export default function NewProject() {
           <label htmlFor="title">Title</label>
           <input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Church explainer — Hausa" />
         </div>
+        {error && <p className="tiny" style={{ color: "var(--bad, #c44)" }}>{error}</p>}
         <div className="row" style={{ marginTop: 8 }}>
-          <button className="btn primary" type="submit">Cast speakers</button>
+          <button className="btn primary" type="submit" disabled={busy}>
+            {busy ? "Creating…" : "Cast speakers"}
+          </button>
           <Link className="btn" href="/studio">Cancel</Link>
         </div>
       </form>
