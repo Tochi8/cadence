@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import MobileDock from "../../components/MobileDock";
 import { loadState, saveState, uid } from "../../../lib/local";
 
 export default function NewProject() {
@@ -25,10 +26,10 @@ export default function NewProject() {
   }
 
   return (
-    <main className="wrap">
+    <main className="wrap app-wrap">
       <header className="top">
         <Link className="brand" href="/">Cadence<span>.</span></Link>
-        <span className="tiny">Step 1 · Name the video</span>
+        <span className="tiny desk-nav">Step 1 · Name the video</span>
       </header>
       <h1 style={{ fontSize: 22, fontWeight: 560, marginBottom: 8 }}>New project</h1>
       <p className="tiny" style={{ marginBottom: 20 }}>
@@ -44,6 +45,7 @@ export default function NewProject() {
           <Link className="btn" href="/studio">Cancel</Link>
         </div>
       </form>
+      <MobileDock />
     </main>
   );
 }

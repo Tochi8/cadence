@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import MobileDock from "../components/MobileDock";
 import { loadState, saveState } from "../../lib/local";
 
 export default function Settings() {
@@ -24,10 +25,10 @@ export default function Settings() {
   }
 
   return (
-    <main className="wrap">
+    <main className="wrap app-wrap">
       <header className="top">
         <Link className="brand" href="/">Cadence<span>.</span></Link>
-        <Link href="/studio">Studio</Link>
+        <Link className="desk-nav" href="/studio">Studio</Link>
       </header>
       <h1 style={{ fontSize: 22, fontWeight: 560, marginBottom: 8 }}>Settings</h1>
       <p className="tiny" style={{ marginBottom: 16 }}>{state.user?.email || "No account on this device"}</p>
@@ -35,6 +36,7 @@ export default function Settings() {
         <button className="btn" type="button" onClick={signOut}>Sign out</button>
         <button className="btn" type="button" onClick={wipe}>Clear local projects</button>
       </div>
+      <MobileDock />
     </main>
   );
 }
